@@ -127,10 +127,10 @@ double fy = 389.0441589355469;
 double cx = 315.0856018066406;
 double cy = 242.38375854492188;
 
-double fx_color = 380.8313293457031;
-double fy_color = 379.9654235839844;
-double cx_color = 309.2689208984375;
-double cy_color = 238.53189086914062;
+double fx_color = 323.89544677734375;
+double fy_color = 246.41885375976562;
+double cx_color = 606.1327514648438;
+double cy_color = 605.5372924804688;
 
 cv::Mat cameraMatrix;
 vector<double> distCoeffs;
@@ -176,7 +176,7 @@ int main(int argc, char **argv) {
     ros::Rate rate(50);
 
 
-    //                       订阅 飞机姿态
+    // 订阅 飞机姿态
     ros::Subscriber plane_attitude = nh.subscribe<geometry_msgs::PoseStamped>("mavros/local_position/pose",1,plane_attitude_cb);
     ros::Subscriber target_corner_sub = nh.subscribe<geometry_msgs::QuaternionStamped>("yolo_target_corner",1,target_corner_cb);
     ros::Subscriber pickup_corner_sub = nh.subscribe<geometry_msgs::QuaternionStamped>("yolo_pickup_corner",1,pickup_corner_cb);
@@ -195,12 +195,12 @@ int main(int argc, char **argv) {
     rs2::frame ir;
 
     //! param init
-    camera_param_set();
-    tf_param_set();
+    camera_param_set(); //for pnp--zzw comment
+    tf_param_set();//coordinate transform--zzw comment
     while (! got_attitude_init){
         ros::spinOnce();
         ROS_INFO("getting yaw init ... ");
-        get_init_yaw();
+        get_init_yaw(); //git initial yaw
         rate.sleep();
     }
 
@@ -328,7 +328,7 @@ int main(int argc, char **argv) {
         target_position_of_img.x() = msg_target_pose_from_img.pose.position.x;
         target_position_of_img.y() = msg_target_pose_from_img.pose.position.y;
         target_position_of_img.z() = msg_target_pose_from_img.pose.position.z;
-
+        //target_position_of_drone 相对飞机的实际坐标点 --zzw commit
         target_position_of_drone = tf_camera_to_drone * (tf_image_to_enu * target_position_of_img);
         ROS_INFO("target_x_of drone: %f, target_y_of drone: %f, target_z_of drone: %f", target_position_of_drone[0],target_position_of_drone[1], target_position_of_drone[2]);
 
@@ -367,21 +367,6 @@ int main(int argc, char **argv) {
         drone_pos_vision.x() = target_position_of_world.x();
         drone_pos_vision.y() = target_position_of_world.y();
         drone_pos_vision.z() = target_position_of_world.z();
-
-        //smooth curr_pos by prev_pos
-//        cout << "vary value = " << abs(drone_pos_vision.x() - drone_pos_vision_prev.x()) + abs(drone_pos_vision.y() - drone_pos_vision_prev.y()) + abs(drone_pos_vision.z() - drone_pos_vision_prev.z()) << endl;
-//        if (abs(drone_pos_vision_prev.x()) > 0.1 && (abs(drone_pos_vision.x() - drone_pos_vision_prev.x()) + abs(drone_pos_vision.y() - drone_pos_vision_prev.y()) + abs(drone_pos_vision.z() - drone_pos_vision_prev.z())) > smooth_threshold){
-//            drone_pos_vision.x() = drone_pos_vision_prev.x();
-//            drone_pos_vision.y() = drone_pos_vision_prev.y();
-//            drone_pos_vision.z() = drone_pos_vision_prev.z();
-//            ROS_ERROR("invalid pose, drop it");
-//        }
-//        else{
-//            drone_pos_vision_prev.x() = drone_pos_vision.x();
-//            drone_pos_vision_prev.y() = drone_pos_vision.y();
-//            drone_pos_vision_prev.z() = drone_pos_vision.z();
-//            ROS_WARN("update prev_pose");
-//        }
 
 
         //low pass filter
@@ -524,10 +509,17 @@ void target_corner_cb(const geometry_msgs::QuaternionStamped::ConstPtr& msg)
         target_left_up_origin.y = int(max(0,int(msg->quaternion.y)));
         target_right_down_origin.x = int(min(640,int(msg->quaternion.z)));
         target_right_down_origin.y = int(min(640,int(msg->quaternion.w)));
-        target_left_up.x = int(max(0,int(msg->quaternion.x - target_width * roi_enlarge_ratio)));
-        target_left_up.y = int(max(0,int(msg->quaternion.y - target_height * roi_enlarge_ratio)));
-        target_right_down.x = int(min(640,int(msg->quaternion.z + target_width * roi_enlarge_ratio)));
-        target_right_down.y = int(min(480,int(msg->quaternion.w + target_height * roi_enlarge_ratio)));
+        //remove roi_enlarge_ratio     --zzw commit
+        // target_left_up.x = int(max(0,int(msg->quaternion.x - target_width * roi_enlarge_ratio)));
+        // target_left_up.y = int(max(0,int(msg->quaternion.y - target_height * roi_enlarge_ratio)));
+        // target_right_down.x = int(min(640,int(msg->quaternion.z + target_width * roi_enlarge_ratio)));
+        // target_right_down.y = int(min(480,int(msg->quaternion.w + target_height * roi_enlarge_ratio)));
+        target_left_up.x = int(max(0,int(msg->quaternion.x));
+        target_left_up.y = int(max(0,int(msg->quaternion.y));
+        target_right_down.x = int(min(640,int(msg->quaternion.z));
+        target_right_down.y = int(min(480,int(msg->quaternion.w));
+
+
         //save last ROI region when no yolo bbox input
         roi_target_left_up.x = target_left_up.x;
         roi_target_left_up.y = target_left_up.y;
@@ -561,8 +553,7 @@ void pickup_corner_cb(const geometry_msgs::QuaternionStamped::ConstPtr& msg)
 void camera_param_set() {
     //camera param
 
-
-
+    // for pnp zzw add comment
     cameraMatrix = cv::Mat::zeros(3, 3, CV_64F);
     distCoeffs = std::vector<double>{0.0, -0.0, -0.0, 0.0, 0};
     cameraMatrix.at<double>(0, 0) = fx; // wzy test

@@ -7,14 +7,15 @@ project(pnp_target_node)
 ## Find catkin macros and libraries
 ## if COMPONENTS list like find_package(catkin REQUIRED COMPONENTS xyz)
 ## is used, also find other catkin packages
-set(OpenCV_DIR /usr/local/share/OpenCV)
+set(OpenCV_DIR /usr/share)
 find_package(Eigen3 REQUIRED)
 include_directories(${EIGEN3_INCLUDE_DIR})
 add_definitions(${EIGEN_DEFINITIONS})
 find_package(realsense2)
+find_package(OpenCV REQUIRED)
+
 
 find_package(catkin REQUIRED COMPONENTS
-        OpenCV
         cv_bridge
         geometry_msgs
         mavros_msgs
@@ -147,14 +148,12 @@ include_directories(
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/pnp_target_node_node.cpp)
-add_executable(pnp_target_node_ros src/pnp_target_node_ros.cpp)
-target_link_libraries(pnp_target_node_ros ${catkin_LIBRARIES} realsense2)
 
-add_executable(pnp_target_node src/pnp_target_node.cpp)
-target_link_libraries(pnp_target_node ${catkin_LIBRARIES} realsense2)
 
 add_executable(pnp_target_node_time src/pnp_target_node_time.cpp)
 target_link_libraries(pnp_target_node_time ${catkin_LIBRARIES} realsense2)
+
+target_link_libraries(pnp_target_node_time ${catkin_LIBRARIES} ${OpenCV_LIBS})
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
