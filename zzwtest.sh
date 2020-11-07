@@ -11,6 +11,9 @@
 source ~/.bashrc   ### zzw_source
 source ~/catkin_ws/devel/setup.bash
 
+#px4_run
+roslaunch px4_realsense_bridge bridge_mavros.launch
+
 ### zzw_nodes_run
 cd /home/gf/zzw/catkin_ws/src/wzy_projects/scripts
 python3 /home/gf/zzw/catkin_ws/src/wzy_projects/scripts/yolo_realsense_tcp.py & sleep 5
