@@ -2,5 +2,4 @@
     <node name="pnp_target_node_time" pkg="pnp_target_node" type="pnp_target_node_time" output="screen">
     </node>
 
-
 </launch>
