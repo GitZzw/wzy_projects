@@ -28,10 +28,10 @@ def clint():
         receive_msg = s.recv(100).decode()
         # print (receive_msg)
         msg = receive_msg.split(',')
-        print(msg)
+        #print(msg)
         if msg[0] == '0':
             target_get_flag = True
-            print ("target corner")
+            #print ("target corner")
             """ QuaternionStamped.x, y, z, w = xmin, ymin, xmax, ymax """
             target_corner_msg.header.stamp = rospy.get_rostime()
             target_corner_msg.quaternion.x = float(msg[1])
@@ -41,7 +41,7 @@ def clint():
 
         if msg[0] == '1':
             pickup_get_flag = True
-            print ("pickup corner")
+            #print ("pickup corner")
             """ QuaternionStamped.x, y, z, w = xmin, ymin, xmax, ymax """
             pickup_corner_msg.header.stamp = rospy.get_rostime()
             pickup_corner_msg.quaternion.x = float(msg[1])
@@ -50,7 +50,7 @@ def clint():
             pickup_corner_msg.quaternion.w = float(msg[4])
 
         if not target_get_flag:
-            print (" target not found ... ")
+           # print (" target not found ... ")
             target_corner_msg.header.stamp = rospy.get_rostime()
             target_corner_msg.quaternion.x = -1.0
             target_corner_msg.quaternion.y = 0.0
@@ -58,7 +58,7 @@ def clint():
             target_corner_msg.quaternion.w = 0.0
 
         if not pickup_get_flag:
-            print (" pickup not found ... ")
+            #print (" pickup not found ... ")
             pickup_corner_msg.header.stamp = rospy.get_rostime()
             pickup_corner_msg.quaternion.x = -1.0
             pickup_corner_msg.quaternion.y = 0.0

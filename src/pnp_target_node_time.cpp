@@ -143,7 +143,7 @@ float lowPassParam = 0.1;
 
 //yolo
 float target_width_world = 0.45;
-float scale_size = 1.21;
+float scale_size = 2;
 cv::Point2f yolo_center;
 float yolo_area;
 cv::Point3f target_yolo_distance;
@@ -226,7 +226,7 @@ int main(int argc, char **argv) {
 //    cv::namedWindow("ir_img_color_show");
 
     while(ros::ok()){
-        ROS_INFO_THROTTLE(1,"in main loop");
+        //ROS_INFO_THROTTLE(1,"in main loop");
         ros::spinOnce();
         data = pipe.wait_for_frames();
         ir = data.get_infrared_frame();
@@ -330,13 +330,13 @@ int main(int argc, char **argv) {
         target_position_of_img.z() = msg_target_pose_from_img.pose.position.z;
         //target_position_of_drone 相对飞机的实际坐标点 --zzw commit
         target_position_of_drone = tf_camera_to_drone * (tf_image_to_enu * target_position_of_img);
-        ROS_INFO("target_x_of drone: %f, target_y_of drone: %f, target_z_of drone: %f", target_position_of_drone[0],target_position_of_drone[1], target_position_of_drone[2]);
+        //ROS_INFO("target_x_of drone: %f, target_y_of drone: %f, target_z_of drone: %f", target_position_of_drone[0],target_position_of_drone[1], target_position_of_drone[2]);
 
         geometry_msgs::PoseStamped synchronized_att;
         while(1){
             if(!pose_queue.empty()){
                 synchronized_att = plane_atti_msg;
-                ROS_ERROR("synchronized_att Errror!!!");
+                //ROS_ERROR("synchronized_att Errror!!!");
                 break;
             }
             synchronized_att = pose_queue.front();
@@ -350,9 +350,9 @@ int main(int argc, char **argv) {
         drone_euler = quaternion2euler(synchronized_att.pose.orientation.x,synchronized_att.pose.orientation.y,synchronized_att.pose.orientation.z,synchronized_att.pose.orientation.w);
 
         drone_euler.z  = drone_euler.z - drone_euler_init.z;
-        ROS_INFO("drone_euler.z: %f, drone_euler_init.z: %f",drone_euler.z,drone_euler_init.z);
+        //ROS_INFO("drone_euler.z: %f, drone_euler_init.z: %f",drone_euler.z,drone_euler_init.z);
         drone_quaternion = euler2quaternion_eigen(drone_euler.x,drone_euler.y,drone_euler.z);
-        ROS_INFO("drone_roll: %f, drone_pitch: %f ,drone_yaw: %f", drone_euler.x,drone_euler.y,drone_euler.z);
+        //ROS_INFO("drone_roll: %f, drone_pitch: %f ,drone_yaw: %f", drone_euler.x,drone_euler.y,drone_euler.z);
         drone_euler_msg.header.stamp = ros::Time::now();
         drone_euler_msg.pose.position.x = drone_euler.x;
         drone_euler_msg.pose.position.y = drone_euler.y;
@@ -399,8 +399,8 @@ int main(int argc, char **argv) {
 
 
 
-        cout << "drone_pos_vision_prev.x()" << drone_pos_vision_prev.x() << endl;
-        cout << "drone_pos_vision x y z: " << drone_pos_vision.x() << " " << drone_pos_vision.y() << " " << drone_pos_vision.z() << endl;
+       // cout << "drone_pos_vision_prev.x()" << drone_pos_vision_prev.x() << endl;
+       // cout << "drone_pos_vision x y z: " << drone_pos_vision.x() << " " << drone_pos_vision.y() << " " << drone_pos_vision.z() << endl;
         cv::putText(ir_img_color_show,
                     "drone_pos_vision x : " + Convert(drone_pos_vision.x()) + "    y: " + Convert(drone_pos_vision.y())  + "    z:" + Convert(drone_pos_vision.z()),
                     cv::Point(5, 20), cv::FONT_HERSHEY_SIMPLEX ,0.6,cv::Scalar(0,0,255),1,8,false);
@@ -474,7 +474,7 @@ int main(int argc, char **argv) {
 void plane_attitude_cb(const geometry_msgs::PoseStamped::ConstPtr& msg)
 {
     plane_atti_msg = *msg;
-    cout << "msg->pose.orientation.z: " << msg->pose.orientation.z << endl;
+    //cout << "msg->pose.orientation.z: " << msg->pose.orientation.z << endl;
     pose_queue.push(*msg);
 }
 
@@ -514,10 +514,10 @@ void target_corner_cb(const geometry_msgs::QuaternionStamped::ConstPtr& msg)
         // target_left_up.y = int(max(0,int(msg->quaternion.y - target_height * roi_enlarge_ratio)));
         // target_right_down.x = int(min(640,int(msg->quaternion.z + target_width * roi_enlarge_ratio)));
         // target_right_down.y = int(min(480,int(msg->quaternion.w + target_height * roi_enlarge_ratio)));
-        target_left_up.x = int(max(0,int(msg->quaternion.x));
-        target_left_up.y = int(max(0,int(msg->quaternion.y));
-        target_right_down.x = int(min(640,int(msg->quaternion.z));
-        target_right_down.y = int(min(480,int(msg->quaternion.w));
+        target_left_up.x = target_left_up_origin.x;
+        target_left_up.y = target_left_up_origin.y;
+        target_right_down.x = target_right_down_origin.x;
+        target_right_down.y = target_right_down_origin.y;
 
 
         //save last ROI region when no yolo bbox input
@@ -538,7 +538,7 @@ void pickup_corner_cb(const geometry_msgs::QuaternionStamped::ConstPtr& msg)
      */
     if(msg->quaternion.x < 0)
     {
-        ROS_WARN_THROTTLE(1, "pickup corner detect failed !");
+        //ROS_WARN_THROTTLE(1, "pickup corner detect failed !");
         pickup_left_up.x = 0;
         pickup_left_up.y = 0;
         pickup_right_down.x = 5;
@@ -890,27 +890,27 @@ bool pnp_process(vector<cv::Point2f> &imgPoints)
 //}
 
 bool yolo_process(cv::Mat &frame){
-    ROS_WARN("yolo_process function");
+    //ROS_WARN("yolo_process function");
     if(frame.empty()){
         ROS_ERROR("yolo_process, NO frame");
         return false;
     }
     if(targetDetectFlag){
-        ROS_INFO("targetDetectFlag");
+      //  ROS_INFO("targetDetectFlag");
         yolo_center.x = (target_left_up_origin.x + target_right_down_origin.x)/2.0;
         yolo_center.y = (target_left_up_origin.y + target_right_down_origin.y)/2.0;
         cv::circle(ir_img_color_show,cv::Point(yolo_center.x,yolo_center.y),3,(100,200,0),3);
 //        yolo_center.x = (target_left_up.x + target_right_down.x)/2.0;
 //        yolo_center.y = (target_left_up.x + target_right_down.y)/2.0;
-        ROS_INFO("target_left_up.x: %d", target_left_up.x);
-        ROS_INFO("target_left_up.y: %d", target_left_up.y);
-        ROS_INFO("target_right_down.x: %d", target_right_down.x);
-        ROS_INFO("target_right_down.y: %d", target_right_down.y);
-        ROS_INFO("target_width: %d", target_width);
-        ROS_INFO("target_height: %d", target_height);
+        //ROS_INFO("target_left_up.x: %d", target_left_up.x);
+        //ROS_INFO("target_left_up.y: %d", target_left_up.y);
+        //ROS_INFO("target_right_down.x: %d", target_right_down.x);
+        //ROS_INFO("target_right_down.y: %d", target_right_down.y);
+        //ROS_INFO("target_width: %d", target_width);
+        //ROS_INFO("target_height: %d", target_height);
 
-        ROS_INFO("yolo_center.x: %f", yolo_center.x);
-        ROS_INFO("yolo_center.y: %f", yolo_center.y);
+//        ROS_INFO("yolo_center.x: %f", yolo_center.x);
+ //       ROS_INFO("yolo_center.y: %f", yolo_center.y);
 //        yolo_area = abs((target_left_up.x - target_right_down.x)*(target_left_up.y - target_right_down.y));
 //        ROS_INFO("yolo_area: %f", yolo_area);
         //根据小孔成像原理估计深度

@@ -112,8 +112,9 @@ class YoloParams:
             self.isYoloV3 = True # Weak way to determine but the only one.
 
     def log_params(self):
-        params_to_print = {'classes': self.classes, 'num': self.num, 'coords': self.coords, 'anchors': self.anchors}
-        [log.info("         {:8}: {}".format(param_name, param)) for param_name, param in params_to_print.items()]
+        k = 1
+        #params_to_print = {'classes': self.classes, 'num': self.num, 'coords': self.coords, 'anchors': self.anchors}
+        #[log.info("         {:8}: {}".format(param_name, param)) for param_name, param in params_to_print.items()]
 
 
 def entry_index(side, coord, classes, location, entry):
@@ -316,7 +317,7 @@ def main():
 
             # >>>>>>>>>>>  calculate time sum >>>>>>>>>>>>>>>#
             cpu_start = time()
-            print('--------------------------new loop---------------------------------')
+        #    print('--------------------------new loop---------------------------------')
             # if is_async_mode:
             #     ret, next_frame = cap.read()
             # else:
@@ -356,7 +357,7 @@ def main():
                 for layer_name, out_blob in output.items():
                     out_blob = out_blob.reshape(net.layers[net.layers[layer_name].parents[0]].shape)
                     layer_params = YoloParams(net.layers[layer_name].params, out_blob.shape[2])
-                    log.info("Layer {} parameters: ".format(layer_name))
+                   # log.info("Layer {} parameters: ".format(layer_name))
                     layer_params.log_params()
                     objects += parse_yolo_region(out_blob, in_frame.shape[2:],
                                                  next_color_frame.shape[:-1], layer_params,
@@ -375,17 +376,17 @@ def main():
             # Drawing objects with respect to the --prob_threshold CLI parameter
             objects = [obj for obj in objects if obj['confidence'] >= args.prob_threshold]
 
-            if len(objects) and args.raw_output_message:
-                log.info("\nDetected boxes for batch {}:".format(1))
-                log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
+            #if len(objects) and args.raw_output_message:
+               # log.info("\nDetected boxes for batch {}:".format(1))
+               # log.info(" Class ID | Confidence | XMIN | YMIN | XMAX | YMAX | COLOR ")
 
             origin_im_size = color_frame.shape[:-1]
 
             count = 1
 
             for obj in objects:
-                print('for obj count:')
-                print(count)
+                #print('for obj count:')
+                #print(count)
                 count = count + 1
                 # Validation bbox of detected object
                 if obj['xmax'] > origin_im_size[1] or obj['ymax'] > origin_im_size[0] or obj['xmin'] < 0 or obj['ymin'] < 0:
@@ -396,11 +397,11 @@ def main():
                 det_label = labels_map[obj['class_id']] if labels_map and len(labels_map) >= obj['class_id'] else \
                     str(obj['class_id'])
 
-                if args.raw_output_message:
-                    log.info(
-                        "{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} | {} ".format(det_label, obj['confidence'], obj['xmin'],
-                                                                                  obj['ymin'], obj['xmax'], obj['ymax'],
-                                                                                  color))
+               # if args.raw_output_message:
+                  #  log.info(
+                  #      "{:^9} | {:10f} | {:4} | {:4} | {:4} | {:4} | {} ".format(det_label, obj['confidence'], obj['xmin'],
+                     #                                                             obj['ymin'], obj['xmax'], obj['ymax'],
+                       #                                                           color))
 
                 cv2.rectangle(color_frame, (obj['xmin'], obj['ymin']), (obj['xmax'], obj['ymax']), color, 2)
                 cv2.putText(color_frame,
@@ -408,13 +409,13 @@ def main():
                     (obj['xmin'], obj['ymin'] - 7), cv2.FONT_HERSHEY_COMPLEX, 0.6, color, 1)
 
 
-                print("obj['class_id']: ", obj['class_id'])
+               # print("obj['class_id']: ", obj['class_id'])
 
                 send_data_byte = bytes(0)
                 if obj['class_id'] == 0:  # 0 is target, 1 is pickup
                     target_leftup_rightdown_corner = [0, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax']]
                     for i in range(len(target_leftup_rightdown_corner)):
-                        print(target_leftup_rightdown_corner[i])
+                        # print(target_leftup_rightdown_corner[i])
                         target_senddata = str(target_leftup_rightdown_corner[i]) + ','
                         # print(target_senddata.encode())
                         send_data_byte += target_senddata.encode()
@@ -424,7 +425,7 @@ def main():
                 if obj['class_id'] == 1:
                     pickup_leftup_rightdown_corner = [1, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax']]
                     for i in range(len(pickup_leftup_rightdown_corner)):
-                        print(pickup_leftup_rightdown_corner[i])
+                        # print(pickup_leftup_rightdown_corner[i])
                         pickup_senddata = str(pickup_leftup_rightdown_corner[i]) + ','
                         # print(pickup_senddata.encode())
                         send_data_byte += pickup_senddata.encode()
@@ -436,7 +437,7 @@ def main():
             if len(objects) == 0:
                 pickup_leftup_rightdown_corner = [-1, 0, 0, 0, 0]
                 for i in range(len(pickup_leftup_rightdown_corner)):
-                    print(pickup_leftup_rightdown_corner[i])
+                    #print(pickup_leftup_rightdown_corner[i])
                     pickup_senddata = str(pickup_leftup_rightdown_corner[i]) + ','
                     # print(pickup_senddata.encode())
                     send_data_byte += pickup_senddata.encode()
@@ -478,10 +479,10 @@ def main():
                 if key == 9:
                     exec_net.requests[cur_request_id].wait()
                     is_async_mode = not is_async_mode
-                    log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
+                  #  log.info("Switched to {} mode".format("async" if is_async_mode else "sync"))
 
             cpu_end = time()
-            print('>>>>>>>>>>>>>>>>>>>>>>>>>>cpu time :  ', cpu_end-cpu_start)
+            #print('>>>>>>>>>>>>>>>>>>>>>>>>>>cpu time :  ', cpu_end-cpu_start)
     finally:
         pipeline.stop()
     cv2.destroyAllWindows()
