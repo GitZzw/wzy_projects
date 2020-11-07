@@ -899,7 +899,7 @@ bool yolo_process(cv::Mat &frame){
       //  ROS_INFO("targetDetectFlag");
         yolo_center.x = (target_left_up_origin.x + target_right_down_origin.x)/2.0;
         yolo_center.y = (target_left_up_origin.y + target_right_down_origin.y)/2.0;
-        cv::circle(ir_img_color_show,cv::Point(yolo_center.x,yolo_center.y),3,(100,200,0),3);
+        cv::circle(ir_img_color_show,cv::Point(yolo_center.x,yolo_center.y),3,(255,0,0),10);
 //        yolo_center.x = (target_left_up.x + target_right_down.x)/2.0;
 //        yolo_center.y = (target_left_up.x + target_right_down.y)/2.0;
         //ROS_INFO("target_left_up.x: %d", target_left_up.x);
