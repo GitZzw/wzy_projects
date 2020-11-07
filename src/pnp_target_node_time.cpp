@@ -127,10 +127,10 @@ double fy = 389.0441589355469;
 double cx = 315.0856018066406;
 double cy = 242.38375854492188;
 
-double fx_color = 380.8313293457031;
-double fy_color = 379.9654235839844;
-double cx_color = 309.2689208984375;
-double cy_color = 238.53189086914062;
+double fx_color = 323.89544677734375;
+double fy_color = 246.41885375976562;
+double cx_color = 606.1327514648438;
+double cy_color = 605.5372924804688;
 
 cv::Mat cameraMatrix;
 vector<double> distCoeffs;
