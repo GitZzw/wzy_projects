@@ -443,7 +443,7 @@ int main(int argc, char **argv) {
             msg_drone_pos_vision.pose.orientation.x = 1;
         }
         else{
-            msg_drone_pos_vision.pose.orientation.x = -1;
+            msg_drone_pos_vision.pose.orientation.x = 8888;
         }
 
 
