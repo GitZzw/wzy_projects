@@ -411,28 +411,6 @@ def main():
 
                # print("obj['class_id']: ", obj['class_id'])
 
-                send_data_byte = bytes(0)
-                if obj['class_id'] == 0:  # 0 is target, 1 is pickup
-                    target_leftup_rightdown_corner = [0, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax']]
-                    for i in range(len(target_leftup_rightdown_corner)):
-                        # print(target_leftup_rightdown_corner[i])
-                        target_senddata = str(target_leftup_rightdown_corner[i]) + ','
-                        # print(target_senddata.encode())
-                        send_data_byte += target_senddata.encode()
-                        # print(send_data_byte)
-                    conn.send(send_data_byte)
-
-                if obj['class_id'] == 1:
-                    pickup_leftup_rightdown_corner = [1, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax']]
-                    for i in range(len(pickup_leftup_rightdown_corner)):
-                        # print(pickup_leftup_rightdown_corner[i])
-                        pickup_senddata = str(pickup_leftup_rightdown_corner[i]) + ','
-                        # print(pickup_senddata.encode())
-                        send_data_byte += pickup_senddata.encode()
-                        # print(send_data_byte)
-                    conn.send(send_data_byte)
-
-
             send_data_byte = bytes(0)
             if len(objects) == 0:
                 pickup_leftup_rightdown_corner = [-1, 0, 0, 0, 0]
@@ -442,6 +420,14 @@ def main():
                     # print(pickup_senddata.encode())
                     send_data_byte += pickup_senddata.encode()
                     # print(send_data_byte)
+                conn.send(send_data_byte)
+            else:
+                objects = sorted(objects, key=lambda obj : obj['class_id'], reverse=False)  ##sort lambda 函数，按class_id值从小到大排列
+                obj = objects[0]
+                target_leftup_rightdown_corner = [1, obj['xmin'], obj['ymin'], obj['xmax'], obj['ymax']]
+                for i in range(len(target_leftup_rightdown_corner)):
+                    target_senddata = str(target_leftup_rightdown_corner[i]) + ','
+                    send_data_byte += target_senddata.encode()
                 conn.send(send_data_byte)
 
             # Draw performance stats over frame
